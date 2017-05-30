@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/coxley/release-me-the-game/types"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
-	// "github.com/coxley/release-me-the-game/state"
 )
 
 var addr = flag.String("addr", "localhost:8080", "http server address")
@@ -53,7 +53,7 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			char := state.Character{}
+			char := &types.Character{Name: *proto.String("coxley")}
 			data, _ := proto.Marshal(char)
 			err := c.WriteMessage(websocket.TextMessage, data)
 			if err != nil {

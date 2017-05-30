@@ -6,7 +6,9 @@ import (
 	// "fmt"
 
 	// "net/http"
+	"github.com/coxley/release-me-the-game/types"
 	"github.com/golang/glog"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 )
 
@@ -36,7 +38,9 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			glog.V(3).Infof("Read: %s", err)
 			break
 		}
-		glog.V(3).Infof("Recv: %s", msg)
+		char := &types.Character{}
+		_ = proto.Unmarshal(msg, char)
+		glog.V(3).Infof("Recv: %#v", char)
 		err = c.WriteMessage(mt, msg)
 		if err != nil {
 			glog.V(3).Infof("Write: %s", err)
