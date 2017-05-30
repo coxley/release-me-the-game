@@ -1,0 +1,46 @@
+package main
+
+import (
+	"flag"
+	"net/http"
+	// "fmt"
+
+	// "net/http"
+	"github.com/golang/glog"
+	"github.com/gorilla/websocket"
+)
+
+var addr = flag.String("addr", "localhost:8080", "http server address")
+var upgrader = websocket.Upgrader{}
+
+func main() {
+	flag.Set("alsologtostderr", "true")
+	flag.Parse()
+
+	http.HandleFunc("/echo", echo)
+
+	glog.Infof("Listening on %s ...", *addr)
+	glog.Fatal(http.ListenAndServe(*addr, nil))
+}
+
+func echo(w http.ResponseWriter, r *http.Request) {
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		glog.Errorf("Failed to upgrade client connection to WS: %s", err)
+	}
+	defer c.Close()
+
+	for {
+		mt, msg, err := c.ReadMessage()
+		if err != nil {
+			glog.V(3).Infof("Read: %s", err)
+			break
+		}
+		glog.V(3).Infof("Recv: %s", msg)
+		err = c.WriteMessage(mt, msg)
+		if err != nil {
+			glog.V(3).Infof("Write: %s", err)
+			break
+		}
+	}
+}
